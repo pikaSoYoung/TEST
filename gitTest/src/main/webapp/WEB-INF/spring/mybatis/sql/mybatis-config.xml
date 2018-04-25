@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	
+	<typeAliases>
+		<typeAlias alias="String" type="java.lang.String" />											
+		<typeAlias alias="Integer" type="java.lang.Integer" />											
+		<typeAlias alias="HashMap" type="java.util.HashMap"/>			
+	</typeAliases>
+	
+	<mappers>
+	
+		<mapper resource="com/example/spring/category/categoryMapper.xml"/>
+		<mapper resource="com/example/spring/board/boardMapper.xml"/>
+		<mapper resource="com/example/spring/replyBoard/replyBoardMapper.xml"/>
+		<mapper resource="com/example/spring/excel/excelMapper.xml"/>
+	
+	</mappers>
+		
+</configuration>

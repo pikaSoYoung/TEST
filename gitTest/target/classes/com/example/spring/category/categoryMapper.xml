@@ -1,0 +1,51 @@
+<!--?xml version="1.0" encoding="UTF-8"? -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="category">
+	<!-- 카테고리 리스트 쿼리 -->
+	<select id="categoryList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			OP_NO as "opNo"  -- 카테고리 옵션 번호
+			,OP_NAME as "opName"  -- 카테고리 옵션 이름
+		FROM
+			CATEGORY		
+		WHERE OP_PRNT_NO = #{opPrntNo}
+		AND DEL_YN = 'N'	
+	
+	</select>
+	
+	<!-- 카테고리 등록 쿼리 -->	
+	<insert id="categoryInsert" parameterType="HashMap" >
+	 	<selectKey keyProperty="opNo" resultType="int" order="BEFORE">
+    		select OP_NO_SEQ.NEXTVAL FROM DUAL
+  		</selectKey>
+		INSERT INTO CATEGORY(
+			OP_NO  -- 옵션 번호
+			,OP_NAME  -- 옵션 이름
+			,OP_PRNT_NO  -- 옵션 부모 값
+			,DEL_YN  -- 삭제여부
+			,CREATE_DATE  -- 생성 날짜
+			) 
+		VALUES(
+			#{opNo}
+			,#{opName}
+			,#{opPrntNo}
+			,'N'
+			,SYSDATE)    
+	</insert>
+	
+	<!-- 카테고리 수정 쿼리 -->	
+	<update id="categoryUpdate" parameterType="HashMap">
+		UPDATE CATEGORY
+		SET OP_NAME = #{opName}  -- 옵션명
+		,UPDATE_DATE = SYSDATE  -- 수정 날짜
+		WHERE OP_NO = #{opNo}  -- 옵션 번호
+	</update>
+	
+	<!-- 카테고리 삭제 쿼리 -->	
+	<update id="categoryDelete" parameterType="HashMap">
+		UPDATE CATEGORY
+		SET DEL_YN = 'Y'  -- 삭제여부
+		,UPDATE_DATE = SYSDATE  -- 수정 날짜
+		WHERE OP_NO = #{opNo}
+	</update>
+</mapper>

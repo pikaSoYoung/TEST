@@ -1,0 +1,175 @@
+<!--?xml version="1.0" encoding="UTF-8"? -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="board">
+	<!-- 글 등록 쿼리  -->
+	<insert id="boardInsert" parameterType="HashMap">
+		INSERT INTO BOARD(
+			BOARD_NO  -- 게시물 번호
+			,BOARD_TITLE  -- 게시물 제목
+			,BOARD_WRITER  -- 게시물 작성자
+			,BOARD_CONTENT  -- 내용  
+			,BOARD_CLICK_CNT -- 조회수
+			,CREATE_DATE  -- 생성일
+			,DEL_YN  -- 삭제여부
+		) 
+		VALUES(
+			BOARD_NUM_SEQ.NEXTVAL
+			,#{boardTitle}
+			,#{boardWriter}
+			,#{boardContent}
+			,0
+			,SYSDATE
+			,'N'
+		)
+	</insert>
+	
+	<!-- 게시물 리스트 쿼리 -->
+	<select id="boardList" parameterType="HashMap" resultType="HashMap">
+   		SELECT
+        	XX.RN1 AS RN1
+    		,TOTALCOUNT as "totalNoticeNum"  -- 게시물 총 개수
+    		,BOARD_NO as "boardNo"  -- 게시물 번호
+    		,BOARD_TITLE as "boardTitle" -- 게시물 제목
+    		,BOARD_WRITER as "boardWriter" -- 게시물 작성자
+    		,BOARD_CONTENT as "boardContent" -- 내용
+    		,CREATEDATE as "createDate"  -- 생성 날짜  
+    		,BOARD_CLICK_CNT as "boardClickCnt"  -- 조회수
+    	FROM(SELECT 
+   				ROWNUM AS RN1  -- 순번
+    			,TOTALCOUNT   
+    			,BOARD_NO 
+    			,BOARD_TITLE 
+    			,BOARD_WRITER 
+    			,BOARD_CONTENT
+    			,CREATEDATE
+    			,BOARD_CLICK_CNT
+			FROM (SELECT 
+        			BOARD_NO
+        			,BOARD_TITLE
+        			,BOARD_WRITER
+        			,BOARD_CONTENT
+        			,TO_CHAR(TO_DATE(CREATE_DATE,'YY/MM/DD'),'YYYY-MM-DD') AS CREATEDATE
+        			,BOARD_CLICK_CNT
+        			,COUNT(BOARD_NO) OVER() AS TOTALCOUNT
+    			FROM BOARD
+    			WHERE DEL_YN='N' 
+    			<if test="searchCnd !=null and searchCnd !=''">  -- 검색 값이 있는 경우 if
+				<choose>
+					<when test="searchCnd == 'boardTitle'">  -- 제목으로 검색 시 
+						and BOARD_TITLE LIKE '%'||#{searchWd}||'%'
+					</when>
+					<when test="searchCnd == 'boardWriter'">  -- 작성자로 검색 시
+						and BOARD_WRITER LIKE '%'||#{searchWd}||'%'
+					</when>
+					<when test="searchCnd == 'boardContent'">  -- 내용으로 검색 시
+						and BOARD_CONTENT LIKE '%'||#{searchWd}||'%'
+					</when>
+				</choose>
+				</if>
+    		  	ORDER BY BOARD_NO DESC)
+			)XX
+		WHERE XX.RN1  <![CDATA[<=]]>#{noticeCountEnd}	
+		AND XX.RN1  <![CDATA[>]]> #{noticeCount}
+	</select>
+	
+	<!-- 게시물 상세정보 쿼리 -->
+	<select id="boardDetail" parameterType="HashMap" resultType="HashMap">
+		SELECT 
+			BOARD_NO AS "boardNo",  -- 게시물 번호
+			BOARD_TITLE AS "boardTitle",  -- 게시물 제목
+			BOARD_WRITER AS "boardWriter",  -- 게시물 작성자
+			BOARD_CONTENT AS "boardContent",  -- 내용
+			TO_CHAR(TO_DATE(CREATE_DATE,'YY/MM/DD'),'YYYY-MM-DD') AS "createDate",  -- 생성날짜
+			BOARD_CLICK_CNT AS "boardClickCnt"  -- 조회수
+		FROM BOARD 
+		WHERE BOARD_NO=#{boardNo}
+	</select>
+	
+	<!-- 파일 리스트 쿼리 -->
+	<select id="fileList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			FILE_NO AS "fileNo",  -- 파일 번호
+			SYS_NM AS "sysNm",  -- 파일 시스템 명
+			ORG_NM AS "orgNm"  -- 파일 원본 명
+		FROM BOARDFILE	
+		WHERE BOARD_NO = #{boardNo}
+		AND DEL_YN='N'
+	</select>	
+	
+	<!--게시글 수정업데이트 쿼리 -->
+	<update id="boardUpdate" parameterType="HashMap">
+		UPDATE BOARD 
+ 			SET 
+ 				BOARD_TITLE=#{boardTitle},  -- 게시물 제목
+ 				BOARD_WRITER=#{boardWriter},  -- 게시물 작성자
+ 				BOARD_CONTENT=#{boardContent},  -- 내용
+ 				UPDATE_DATE=SYSDATE  -- 업데이트 날짜
+		WHERE BOARD_NO=#{boardNo}
+	</update>
+	
+	<!-- 삭제 쿼리 -->
+	<delete id="boardDelete" parameterType="HashMap">
+		UPDATE BOARD 
+			SET DEL_YN='Y', -- 삭제 여부 
+			  UPDATE_DATE = SYSDATE
+		WHERE BOARD_NO=#{boardNo}
+	</delete>
+	
+	<!-- 조회수 증가 쿼리  -->
+	<update id="updateCnt" parameterType="HashMap">
+		UPDATE BOARD 
+			SET BOARD_CLICK_CNT=( -- 조회수 증가
+				SELECT 
+					NVL(BOARD_CLICK_CNT,0)<![CDATA[+]]>1
+					FROM BOARD
+					WHERE BOARD_NO=#{boardNo}
+			) 
+		WHERE BOARD_NO=#{boardNo}
+	</update>
+	
+	<!-- 파일 정보 입력 쿼리 -->
+	<insert id="fileInsert" parameterType="HashMap">
+		INSERT INTO BOARDFILE(
+			FILE_NO  -- 파일 번호
+			,BOARD_NO  -- 게시물 번호
+			,SYS_NM  -- 파일 시스템 명
+			,ORG_NM  -- 파일 원본 명
+			,CREATE_DATE  -- 생성 날짜
+			,DEL_YN  -- 삭제 여부
+		)VALUES(
+			FILE_NO_SEQ.NEXTVAL
+			,BOARD_NUM_SEQ.CURRVAL
+			,#{sysNm}
+			,#{orgNm}
+			,SYSDATE
+			,'N'
+		)
+	</insert>
+	
+	<!-- 파일 입력 쿼리 -->
+	<insert id="fileUpdate" parameterType="HashMap">
+		INSERT INTO BOARDFILE(
+			FILE_NO  -- 파일 번호
+			,BOARD_NO  -- 게시물 번호
+			,SYS_NM  -- 파일 시스템 명
+			,ORG_NM  --파일 원본 명
+			,CREATE_DATE  -- 생성 날짜
+			,DEL_YN  -- 삭제여부
+		)VALUES(
+			FILE_NO_SEQ.NEXTVAL
+			,#{boardNo}
+			,#{sysNm}
+			,#{orgNm}
+			,SYSDATE
+			,'N'
+		)
+	</insert>
+
+	<!-- 파일 삭제 쿼리-->
+	<update id="fileDelete" parameterType="String">
+		UPDATE BOARDFILE
+			SET DEL_YN = 'Y' -- 삭제 여부
+		WHERE FILE_NO = #{fileNo}	
+	</update>
+</mapper>

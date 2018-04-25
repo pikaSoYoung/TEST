@@ -1,0 +1,178 @@
+<!--?xml version="1.0" encoding="UTF-8"? -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="reBoard">
+	<!-- 게시물 리스트 쿼리 -->
+	<select id="reBoardList" parameterType="HashMap" resultType="HashMap">
+   		SELECT
+        	XX.RN1 AS RN1
+    		,TOTALCOUNT as "totalNoticeNum"  -- 게시물 총 개수
+    		,BOARD_NO as "boardNo"  -- 게시물 번호
+    		,BOARD_TITLE as "boardTitle"  -- 게시물 제목
+    		,BOARD_WRITER as "boardWriter"  -- 게시물 작성자
+    		,BOARD_CONTENT as "boardContent"  -- 내용
+    		,CREATEDATE as "createDate"  -- 생성 날짜
+    		,BOARD_CLICK_CNT as "boardClickCnt"  -- 조회수
+    	FROM(SELECT 
+   				ROWNUM AS RN1
+    			,TOTALCOUNT 
+    			,BOARD_NO 
+    			,BOARD_TITLE 
+    			,BOARD_WRITER 
+    			,BOARD_CONTENT
+    			,CREATEDATE
+    			,BOARD_CLICK_CNT
+			FROM (SELECT 
+        			BOARD_NO
+        			,BOARD_TITLE
+        			,BOARD_WRITER
+        			,BOARD_CONTENT
+        			,TO_CHAR(TO_DATE(CREATE_DATE,'YY/MM/DD'),'YYYY-MM-DD') AS CREATEDATE
+        			,BOARD_CLICK_CNT
+        			,COUNT(BOARD_NO) OVER() AS TOTALCOUNT
+    			FROM TBL_BOARD
+    			WHERE DEL_YN='N' 
+    			<if test="searchCnd !=null and searchCnd !=''">  -- 검색 값이 있는 경우 if
+				<choose>
+					<when test="searchCnd == 'boardTitle'">  -- 제목으로 검색 한 경우
+						and BOARD_TITLE LIKE '%'||#{searchWd}||'%'
+					</when>
+					<when test="searchCnd == 'boardWriter'">  -- 작성자로 검색 한 경우
+						and BOARD_WRITER LIKE '%'||#{searchWd}||'%'
+					</when>
+					<when test="searchCnd == 'boardContent'">  -- 내용으로 검색 한 경우
+						and BOARD_CONTENT LIKE '%'||#{searchWd}||'%'
+					</when>
+				</choose>
+				</if>
+    		  	ORDER BY BOARD_NO DESC)
+			)XX
+		WHERE XX.RN1  <![CDATA[<=]]>#{noticeCountEnd}	
+		AND XX.RN1  <![CDATA[>]]> #{noticeCount}
+	</select>
+	
+	<!-- 글 등록 쿼리  -->
+	<insert id="reBoardInsert" parameterType="HashMap">
+		INSERT INTO TBL_BOARD(
+			BOARD_NO	-- 게시물 번호
+			,BOARD_TITLE  -- 게시물 제목
+			,BOARD_WRITER  -- 게시물 작성자
+			,BOARD_CONTENT  -- 내용 
+			,BOARD_CLICK_CNT  -- 조회수
+			,CREATE_DATE  -- 생성 날짜
+			,DEL_YN  -- 삭제여부
+		) 
+		VALUES(
+			REBOARD_NO_SEQ.NEXTVAL
+			,#{boardTitle}
+			,#{boardWriter}
+			,#{boardContent}
+			,0
+			,SYSDATE
+			,'N'
+		)
+	</insert>
+	
+	<!--게시글 수정업데이트 쿼리 -->
+	<update id="boardUpdate" parameterType="HashMap">
+		UPDATE TBL_BOARD 
+ 			SET 
+ 				BOARD_TITLE=#{boardTitle},  -- 게시물 제목
+ 				BOARD_WRITER=#{boardWriter},  -- 게시물 작성자
+ 				BOARD_CONTENT=#{boardContent},  -- 내용
+ 				UPDATE_DATE=SYSDATE  -- 업데이트 날짜
+		WHERE BOARD_NO=#{boardNo}
+	</update>
+	
+	<!-- 게시글 삭제 쿼리  -->
+	<delete id="reBoardDelete" parameterType="HashMap">
+		UPDATE TBL_BOARD 
+			SET DEL_YN='Y' -- 삭제여부
+		WHERE BOARD_NO=#{boardNo}
+	</delete>
+	
+	<!-- 게시글 댓글 개수 쿼리-->
+	<select id="replyLength" parameterType="HashMap" resultType="Int">
+		SELECT
+			NVL(COUNT(REPLY_NO),0) AS "replyLength" -- 댓글 총 개수
+		FROM TBL_REPLY
+		WHERE BOARD_NO = #{boardNo}	
+		AND DEL_YN = 'N'
+	</select>
+	
+	<!-- 리플 등록 쿼리  -->
+	<insert id="replyInsert" parameterType="HashMap">
+		<selectKey keyProperty="replyNo" resultType="int" order="BEFORE">
+    		select REPLY_NO_SEQ.NEXTVAL FROM DUAL  -- 부여될 댓글 번호
+  		</selectKey>
+		INSERT INTO TBL_REPLY(
+			REPLY_NO  -- 댓글 번호
+			,BOARD_NO  -- 게시물 번호	
+			,REPLYER  -- 댓글 작성자
+			,REPLY_CONTENT  -- 댓글 내용
+			,CREATE_DATE  -- 생성 날짜
+			,DEL_YN  -- 삭제여부
+		) 
+		VALUES(
+			#{replyNo}
+			,#{boardNo}
+			,#{replyer}
+			,#{replyContent}
+			,SYSDATE
+			,'N'
+		)
+	</insert>
+	
+	<!-- 리플 업데이트 쿼리 -->
+	<update id="replyUpdate" parameterType="HashMap">
+		UPDATE TBL_REPLY
+		SET REPLYER = #{replyer}  -- 댓글 작성자
+		,REPLY_CONTENT = #{replyContent}  -- 댓글 내용
+		,UPDATE_DATE = SYSDATE  -- 수정 날짜
+		WHERE REPLY_NO = #{replyNo}
+	</update>	
+	
+	<!-- 리플 삭제 쿼리 -->
+	<update id="replyDelete" parameterType="HashMap">
+		UPDATE TBL_REPLY 
+		SET DEL_YN='Y'  -- 삭제 여부
+		,UPDATE_DATE = SYSDATE  -- 수정 날짜
+		WHERE REPLY_NO = #{replyNo}
+	</update>
+		
+	<!-- 게시물 상세정보 쿼리 -->
+	<select id="reBoardDetail" parameterType="HashMap" resultType="HashMap">
+		SELECT 
+			BOARD_NO AS "boardNo", -- 게시물 번호
+			BOARD_TITLE AS "boardTitle",  -- 게시물 제목
+			BOARD_WRITER AS "boardWriter",  -- 게시물 작성자
+			BOARD_CONTENT AS "boardContent",  -- 내용
+			TO_CHAR(TO_DATE(CREATE_DATE,'YY/MM/DD'),'YYYY-MM-DD') AS "createDate",  -- 생성날짜
+			BOARD_CLICK_CNT AS "boardClickCnt"  -- 조회수
+		FROM TBL_BOARD 
+		WHERE BOARD_NO=#{boardNo}
+	</select>
+	
+	<!-- reply 상세정보 쿼리 -->
+	<select id="replyDetail" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			REPLY_NO AS "replyNo", -- 댓글 번호
+			REPLYER AS "replyer",  -- 댓글 작성자
+			REPLY_CONTENT AS "replyContent",  -- 댓글 내용
+			CREATE_DATE AS "creatDate"  -- 생성 날짜
+		FROM TBL_REPLY	
+		WHERE BOARD_NO=#{boardNo}	
+		AND DEL_YN = 'N'
+	</select>	
+	
+	<!-- 조회수 증가 쿼리  -->
+	<update id="reUpdateCnt" parameterType="HashMap">
+		UPDATE TBL_BOARD 
+			SET BOARD_CLICK_CNT=(
+				SELECT 
+					NVL(BOARD_CLICK_CNT,0)<![CDATA[+]]>1
+					FROM TBL_BOARD
+					WHERE BOARD_NO=#{boardNo}
+			)
+		WHERE BOARD_NO=#{boardNo}
+	</update>
+</mapper>

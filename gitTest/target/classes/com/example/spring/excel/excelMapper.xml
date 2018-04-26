@@ -3,12 +3,23 @@
 <mapper namespace="excel">
 	<!-- excel 등록 -->
 	<insert id="excelUpload" parameterType="HashMap">
-		INSERT INTO EXCELTEST VALUES(
-			#{A}
-			,#{B}
-			,#{C}
-			,#{D}
-			,#{E}
-		)
+		INSERT ALL 
+		<foreach collection="list" item="content">
+		INTO EXCELTEST(
+			COL1
+			,COL2
+			,COL3
+			,COL4
+			,COL5
+		)VALUES
+			(
+				#{content.A}
+				,#{content.B}
+				,#{content.C}
+				,#{content.D}
+				,#{content.E}
+			)
+		</foreach>
+		SELECT * FROM DUAL
 	</insert>
 </mapper>

@@ -1,0 +1,23 @@
+<!--?xml version="1.0" encoding="UTF-8"? -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="popup">
+	<insert id="popupInsert" parameterType="HashMap">
+		INSERT INTO POPUP(
+			P_FILE_NO
+			,P_SYS_NM
+			,P_ORG_NM
+			,START_DATE
+			,END_DATE
+			,CREATE_DATE
+			,DEL_YN
+		)VALUES(
+			P_FILE_SEQ.NEXTVAL
+			,#{pSysNm}
+			,#{pOrgNm}
+			,#{startDate}
+			,#{endDate}		
+			,SYSDATE
+			,'N'
+		)
+	</insert>
+</mapper>

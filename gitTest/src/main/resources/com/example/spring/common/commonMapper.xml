@@ -1,0 +1,12 @@
+<!--?xml version="1.0" encoding="UTF-8"? -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="common">
+	<select id="popup" resultType="HashMap">
+		SELECT
+			P_SYS_NM AS "pSysNm"
+		FROM POPUP	
+		WHERE DEL_YN = 'N' 
+		AND START_DATE<![CDATA[<=]]> SYSDATE
+		AND END_DATE<![CDATA[>=]]> SYSDATE
+	</select>
+</mapper>

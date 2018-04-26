@@ -17,6 +17,8 @@
 		<mapper resource="com/example/spring/board/boardMapper.xml"/>
 		<mapper resource="com/example/spring/replyBoard/replyBoardMapper.xml"/>
 		<mapper resource="com/example/spring/excel/excelMapper.xml"/>
+		<mapper resource="com/example/spring/popup/popupMapper.xml"/>
+		<mapper resource="com/example/spring/common/commonMapper.xml"/>
 	
 	</mappers>
 		

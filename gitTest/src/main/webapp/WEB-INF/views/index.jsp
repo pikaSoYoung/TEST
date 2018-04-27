@@ -17,33 +17,39 @@
 		events(); //이벤트 등록
 	});//document
 	
+	//이벤트
 	var events = function(){
 		$("body").on("click","[name='popupCloseBtn']",popupClose);
 	}//events
 
+	//팝업 오픈
 	var popup = function(){
-		var cookiedata = document.cookie;
 		
 		paging.ajaxSubmit("popup.ajax","",function(result){
-			var popupList = result;
-			var fileName = "";
 			
+			var popupList = result; //팝업 리스트
+			var fileName = ""; //경로를 제외한 파일이름 저장변수
+			
+			//팝업 리스트 존재여부 if
 			if(popupList!=null&& popupList.length>0){
+				//팝업 리스트 each
 				$.each(popupList,function(index,value){
 					fileName = value.pSysNm;
-					console.log(fileName+" : ",cookiedata+" : ",cookiedata.indexOf(fileName));
-		
-					if(cookiedata.indexOf(fileName)==-1){
+					
+					//쿠키에 해당 파일명 존재 여부
+					if(getCookie(fileName)==""||getCookie(fileName)==false){
 						
 						var str = 	"<div name='popupModalWrap' class='modalWrap' >"+
-							  		"<button type='button' class='closeBtn' name='popupCloseBtn'>X</button>"+
-							  		"<img src='/spring/popupImg/"+fileName+"'>"+
-									"<div>"+
-										"<span>오늘 하루 보이지 않음</span>"+
-										"<input type='checkbox' name='checkPopup' style='cursor:pointer;'>"+
-									"</div>"+
-								"</div>";
-								
+			  							"<button type='button' class='closeBtn' name='popupCloseBtn'>X</button>"+
+			  							"<a href='"+value.pUrl+"'>"+
+			  								"<img src='/spring/popupImg/"+fileName+"'>"+
+			  							"</a>"+
+										"<div>"+
+											"<span>오늘 하루 보이지 않음</span>"+
+											"<input type='checkbox' name='checkPopup' style='cursor:pointer;'>"+
+										"</div>"+
+									"</div>";
+						//팝업 생성		
 						$("body").append(str);
 					}//if
 				});//each
@@ -51,93 +57,59 @@
 		});//paging.ajaxSubmit
 	}//popup
 	
+	//팝업 창 닫기
 	var popupClose = function(){
+		
 		var $thisWrap = $(this).parent("div");
 		var check = $thisWrap.find("[name='checkPopup']").prop("checked");
 		var imgHref = $thisWrap.find("img").attr("src");
-		console.log("imgHref"+imgHref);
+		
 		var fileName = imgHref.substring(imgHref.lastIndexOf("/")+1);
 		
 		if(check==true){
-			setCookie("fileName",fileName,1);	
+			//쿠기에 해당 파일명 저장
+			setCookie(fileName,true,1);	
 		}//if
 		
-		$thisWrap.hide();
-		
+		//해당 팝업 hide()
+		$thisWrap.hide();	
 	}//popupClose
 	
+	//쿠키 설정 (name,value,유효날짜)
 	var setCookie = function(cname, cvalue, exdays, fileName){
-		var d = new Date();
-		d.setTime(d.getTime() + (exdays*24*60*60*1000));
-		var expires = "expires="+d.toUTCString();
-		document.cookie += cname + "=" + cvalue + "; "+ expires ;
-		console.log(document.cookie);
+		
+		var date = new Date();
+		var today = date.setTime(date.getTime() + (exdays*24*60*60*1000));
+		var expires = "expires="+date.toUTCString();
+		
+		document.cookie = cname + "=" + cvalue +"; "+ expires+";"	
 	}//setCookie
 	
+	//쿠키 추출
 	var getCookie = function(cname){
+		
 		 var name = cname + "=";
 		 var ca = document.cookie.split(';');
 		    
 		 for(var i=0; i<ca.length; i++) {
 		    var c = ca[i];
 		    while (c.charAt(0)==' ') c = c.substring(1);
-		    if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
-		 }
+		    if (c.indexOf(name) != -1){
+		    	return c.substring(name.length,c.length);
+		    }//if
+		 }//for
 		 return "";
 	}//getCookie
 	
-	/* 팝업 cookie 설정 출처 http://slreference.tistory.com/47 */
-
-/*아래 소스 참고 cookie 설정 다시 하기*/	
+	//쿠키 삭제
+	var deleteCookie =function(cname){
 	
-/*Cookie 제거
-function clearCookie( name ){
-
-    var today = new Date();
-    var expire_date = new Date(today.getTime() - 60*60*24*1000);
-    document.cookie = name + "= " + "; expires=" + expire_date.toGMTString();
-}
-
-Cookie 체크 
-function getCookie( name ){
-
-	var dc = document.cookie;
-
-	var prefix = name + "="
-
-	var begin = dc.indexOf("; " + prefix);
-
-	if ( begin == -1 ){
-
-		begin = dc.indexOf(prefix);
-		if (begin != 0) return null;
-	}
-	else begin += 2
-
-	var end = document.cookie.indexOf(";", begin);
-
-	if (end == -1) end = dc.length;
-
-	return unescape(dc.substring(begin + prefix.length, end));
-}
-
-Cookie 컨트롤
-function controlCookie( name, elemnt ){
-
-	if ( elemnt.checked ){
-
-	    var today = new Date()
-	    var expire_date = new Date(today.getTime() + 60*60*6*1000)
-
-		setCookie( name=name, value='true', expires=expire_date, path='/' );
-		if (_ID(name) == null) setTimeout( "self.close()" );
-		else setTimeout( "_ID('" + name + "').style.display='none'" );
-	}
-	else clearCookie( name );
-
-	return
-}
-*/
+		var date = new Date();
+		var yesterday = date.setTime(date.getTime() - (1*24*60*60*1000));
+		var expires = "expires="+yesterday.toUTCString();
+		 
+		document.cookie = cname+"="+getCookie(cname)+"; " + expires + ";" 
+	}//deleteCookie
 </script>
 </head>
 <body style="margin:100px; position:relative; top:0; left:0;">

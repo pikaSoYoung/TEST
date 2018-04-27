@@ -6,18 +6,36 @@
 			P_FILE_NO
 			,P_SYS_NM
 			,P_ORG_NM
-			,START_DATE
-			,END_DATE
-			,CREATE_DATE
-			,DEL_YN
+			,P_TITLE
+			,P_URL
+			,P_IDX
+			,P_START_DATE
+			,P_END_DATE
+			,P_CREATE_DATE
+			,P_DEL_YN
 		)VALUES(
 			P_FILE_SEQ.NEXTVAL
 			,#{pSysNm}
 			,#{pOrgNm}
-			,#{startDate}
-			,#{endDate}		
+			,#{pTitle}
+			,#{pUrl}
+			,#{pIdx}
+			,#{pStartDate}
+			,#{pEndDate}		
 			,SYSDATE
 			,'N'
 		)
 	</insert>
+	<select id="popupList" resultType="HashMap">
+		SELECT
+			P_FILE_NO AS "pfileNo"
+			,P_TITLE  AS "pTitle"
+			,P_URL AS "pUrl"
+			,P_IDX AS "pIdx"
+			,TO_CHAR(TO_DATE(P_START_DATE,'YYYYMMDDHH24MISS'),'YYYY-MM-DD HH24:MI:SS') AS "pStartDate"
+			,TO_CHAR(TO_DATE(P_END_DATE,'YYYYMMDDHH24MISS'),'YYYY-MM-DD HH24:MI:SS') AS "pEndDate"
+			,P_CREATE_DATE AS "pCreateDate"
+			,P_DEL_YN AS "pDelYn"
+		FROM POPUP	
+	</select>
 </mapper>

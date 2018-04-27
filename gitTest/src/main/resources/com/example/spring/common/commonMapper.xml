@@ -4,9 +4,12 @@
 	<select id="popup" resultType="HashMap">
 		SELECT
 			P_SYS_NM AS "pSysNm"
+			,P_TITLE AS "pTitle"
+			,P_URL AS "pUrl"
 		FROM POPUP	
-		WHERE DEL_YN = 'N' 
-		AND START_DATE<![CDATA[<=]]> SYSDATE
-		AND END_DATE<![CDATA[>=]]> SYSDATE
+		WHERE P_DEL_YN = 'N' 
+		AND TO_DATE(P_START_DATE,'YYYYMMDDHH24MISS')<![CDATA[<=]]> SYSDATE
+		AND TO_DATE(P_END_DATE,'YYYYMMDDHH24MISS')<![CDATA[>=]]> SYSDATE
+		ORDER BY P_IDX 
 	</select>
 </mapper>

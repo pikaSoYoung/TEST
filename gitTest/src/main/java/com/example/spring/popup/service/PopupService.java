@@ -1,6 +1,7 @@
 package com.example.spring.popup.service;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -18,4 +19,11 @@ public class PopupService {
 		
 		return popupDao.popupInsert(paramMap);	
 	}//popupInsert
-}
+	
+	public List<HashMap<String,String>> popupList(){
+	
+		List<HashMap<String,String>> list = popupDao.popupList();
+		
+		return list;
+	}//popupList
+}//PopupService

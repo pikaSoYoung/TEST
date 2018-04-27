@@ -1,6 +1,7 @@
 package com.example.spring.popup.controller;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,4 +44,12 @@ public class PopupController {
 
 		return popupService.popupInsert(paramMap);
 	}//popupInsert	
+	
+	@RequestMapping(value="popupList.do")
+	public @ResponseBody List<HashMap<String,String>> popupList(){
+	
+		List<HashMap<String,String>> list = popupService.popupList();
+		
+		return list;
+	}//popupList
 }//PopupController

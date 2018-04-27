@@ -82,6 +82,14 @@ public class UploadFileUtils {
     public static String getRootPath(String fileName, HttpServletRequest request) {
 
         String rootPath = "/upload";
+        
+        MediaType mediaType = MediaUtils.getMediaType(fileName);
+        
+        //이미지 파일의 경우 popup폴더에 저장
+    	if(mediaType != null) {
+    		return "C:\\temp1"+rootPath + "/popupImg";
+    	}
+        
         return "C:\\temp1"+rootPath + "/files"; // 일반파일 경로
         
     }//getRootPath

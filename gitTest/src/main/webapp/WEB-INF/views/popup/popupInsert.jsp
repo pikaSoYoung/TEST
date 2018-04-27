@@ -129,7 +129,7 @@
 	    		
 	    		if(result==1){
 	    			alert("등록되었습니다.");
-	    			$("form input[type='text']").val("");
+	    			$("form input").val("");
 	    			$("[name='popupList']>tbody").children().remove();
 	    			popupList();
 	    		}else{

@@ -12,11 +12,6 @@
     		,BOARD_CONTENT as "boardContent"  -- 내용
     		,CREATEDATE as "createDate"  -- 생성 날짜
     		,BOARD_CLICK_CNT as "boardClickCnt"  -- 조회수
-    		,(SELECT 
-    				COUNT(REPLY_NO) 
-    		  FROM TBL_REPLY 
-    		  WHERE XX.BOARD_NO = TBL_REPLY.BOARD_NO 
-    		  AND TBL_REPLY.DEL_YN = 'N') AS "replyCnt" --댓글 개수
     	FROM(SELECT 
    				ROWNUM AS RN1
     			,TOTALCOUNT 

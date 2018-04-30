@@ -125,13 +125,18 @@
 			count = totalNoticeNum - ((data.choicePage-1)*viewNoticeMaxNum); //게시물 번호 구하기
 	
 			if(thisList!=null){
-				$.each(thisList,function(index){
+				$.each(thisList,function(index,value){
 					str += "<tr style='cursor:pointer'>";
 					str += "<td>"+count+"</td>";
-					str += "<td><a href='#' name='"+thisList[index].boardNo+"'>"+thisList[index].boardTitle+"</td>";
-					str += "<td>"+thisList[index].boardWriter+"</td>";
-					str += "<td>"+thisList[index].createDate+"</td>";
-					str += "<td>"+thisList[index].boardClickCnt+"</td></tr>";
+					str += "<td><a href='#' name='"+value.boardNo+"'>"+value.boardTitle;
+					//댓글 존재 여부 if
+					if(value.replyCnt>0){
+						str+= " ["+value.replyCnt+"]"
+					}//if
+					str +="</td>";
+					str += "<td>"+value.boardWriter+"</td>";
+					str += "<td>"+value.createDate+"</td>";
+					str += "<td>"+value.boardClickCnt+"</td></tr>";
 					
 					count--;
 				});//each

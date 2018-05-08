@@ -122,6 +122,7 @@
 		<li><a href="chartTest.do">차트</a></li>
 		<!-- <li><a href="fullcalendar.do">일정 달력</a></li> -->
 		<li><a href="popupInsertForm.do">POPUP 설정</a></li>
+		<li><a href="apiSample.do">주소검색</a></li>
 	</ul>	
 
 </body>
